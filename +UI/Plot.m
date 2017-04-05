@@ -42,7 +42,7 @@ classdef Plot < handle
             [self.data,~,~] = xlsread(self.filename);
             % Automatic QRS Marker
             self.firstChannel = self.data(:,1);
-            [yValue, self.qrsXLocations] = findpeaks(self.firstChannel, 'MinPeakProminence', 0.2, 'MinPeakDistance', 300);
+            [~, self.qrsXLocations] = findpeaks(self.firstChannel, 'MinPeakProminence', 0.2, 'MinPeakDistance', 300);
             for a = 1:length(self.qrsXLocations)
                 self.qrsXLocationsMin(a) = self.qrsXLocations(a) - 40;
                 self.qrsXLocationsPlus(a) = self.qrsXLocations(a) + 40;
