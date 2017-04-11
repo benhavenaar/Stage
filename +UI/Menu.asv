@@ -1,0 +1,10 @@
+classdef Menu < handle
+    properties
+    end
+
+    methods
+        function self = Menu
+        end
+    end
+    
+end

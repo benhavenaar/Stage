@@ -6,7 +6,10 @@ classdef App < handle
         mark;
         graph;
         panel;
+        menu;
         panMode;
+        
+        opened = false;
     end
     
     methods
@@ -14,10 +17,22 @@ classdef App < handle
             delete(self.window);
         end
         
+        function fileOpenerCallback(self, ~, ~)
+            [filename, PathName] = uigetfile('.E01', 'Select E01 File');
+            
+            if PathName
+                disp(filename);
+                disp(PathName);
+            end
+        end
+        
         function run(self)
             self.create;
             
             self.panel.setCallback(@self.selectableCallback);
+            
+            self.menu.setOpen(@self.fileOpenerCallback);
+            
             self.show;
             self.markingCallback;
         end
@@ -25,13 +40,15 @@ classdef App < handle
     
     methods (Access = private)
         function create(self)
-            self.window = figure('NumberTitle', 'off', 'Name', 'ECG Test',...
+            self.window = figure('MenuBar', 'none','ToolBar', 'figure',...
+                'NumberTitle', 'off', 'Name', 'ECG Test',...
                 'units', 'normalized', 'outerposition', [.1 .15 .80 .75],...
                 'KeyPressFcn', @self.keyCallback);
             self.graphX = axes(self.window, 'Position', [.05, 0, .95, .5]);
-            
+
             self.graph = UI.Plot(self.graphX);
             self.panel = UI.Panel(self.window);
+            self.menu = UI.Menu;
         end
         
         function show(self)
