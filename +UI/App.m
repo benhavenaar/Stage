@@ -9,10 +9,11 @@ classdef App < handle
         menu;
         panMode;
         
+        reader;
         opened = false;
     end
     
-    methods
+    methods 
         function closeApp(self,~,~)
             delete(self.window);
         end
@@ -21,8 +22,20 @@ classdef App < handle
             [filename, PathName] = uigetfile('.E01', 'Select E01 File');
             
             if PathName
-                disp(filename);
-                disp(PathName);
+                self.reader = FILE.Reader([PathName filename]);
+                
+                if exist([PathName filename '.m'], 'file')
+                    L = load([PathName filename '.m'], '-mat');
+                end
+                
+                if ~self.opened
+                    self.graph.plot(self.reader.all);
+                    self.opened = true;
+                else
+                    self.closeApp
+                    self.run;
+                    self.graph.plot(self.reader.all);
+                end
             end
         end
         
@@ -53,7 +66,7 @@ classdef App < handle
         
         function show(self)
             self.graph.show;
-            self.graph.plot;
+%             self.graph.plot;
             self.panel.show;
         end
         

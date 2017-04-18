@@ -9,16 +9,34 @@ classdef App < handle
         menu;
         panMode;
         
+        reader;
         opened = false;
     end
     
-    methods
+    methods 
         function closeApp(self,~,~)
             delete(self.window);
         end
         
         function fileOpenerCallback(self, ~, ~)
+            [filename, PathName] = uigetfile('.E01', 'Select E01 File');
             
+            if PathName
+                self.reader = FILE.Reader([PathName filename]);
+                
+                if exist([PathName filename '.m'], 'file')
+                    L = load([PathName filename '.m'], '-mat');
+                end
+                
+                if ~self.opened
+                    self.graph.plot(self.reader.all);
+                    self.opened = true;
+                else
+                    self.closeApp
+                    self.run;
+                    self.graph.draw(self.reader.all);
+                end
+            end
         end
         
         function run(self)

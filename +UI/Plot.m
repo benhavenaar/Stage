@@ -1,6 +1,6 @@
 classdef Plot < handle
     properties;
-        filename = 'C:\Users\502896\Desktop\Documentatie Stagiaires\Ben Havenaar\src\test.xlsx';
+        filename = 'C:\Users\502896\Desktop\Documentatie Stagiaires\Ben Havenaar\src\test2.xlsx';
         view;
         scroll;
         zoom;
@@ -38,9 +38,9 @@ classdef Plot < handle
             self.timeline = [0 1000];
         end
         
-        function plot(self)
-            [self.data,~,~] = xlsread(self.filename);
+        function plot(self, data)
             % Automatic QRS Marker
+            self.data = data;
             self.firstChannel = self.data(:,1);
             [~, self.qrsXLocations] = findpeaks(self.firstChannel, 'MinPeakProminence', 0.2, 'MinPeakDistance', 300);
             for a = 1:length(self.qrsXLocations)
