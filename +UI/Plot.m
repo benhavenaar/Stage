@@ -1,10 +1,10 @@
 classdef Plot < handle
     properties;
-        filename = 'C:\Users\502896\Desktop\Documentatie Stagiaires\Ben Havenaar\src\test2.xlsx';
         view;
         scroll;
         zoom;
         timeline;
+        points;
         
         data;
         channel = 1;
@@ -25,8 +25,7 @@ classdef Plot < handle
         plotQRS;
         plotPeaks;
         plotValleys;
-        plotNegSlope;
-        plotPosSlope;
+        plotSlope;
         marks;
     end
     
@@ -39,8 +38,8 @@ classdef Plot < handle
         end
         
         function plot(self, data)
-            % Automatic QRS Marker
             self.data = data;
+            % Automatic QRS Marker
             self.firstChannel = self.data(:,1);
             [~, self.qrsXLocations] = findpeaks(self.firstChannel, 'MinPeakProminence', 0.2, 'MinPeakDistance', 300);
             for a = 1:length(self.qrsXLocations)
@@ -63,21 +62,18 @@ classdef Plot < handle
             self.plotQRS = plot(self.qrsX, self.y, 'g');hold on;
             [~, locs] = findpeaks(self.y); %standard peak finding
             [~,idx] = findpeaks(self.invY); %initial valley setting
-            [~,locs2] = findpeaks(self.derY); %positive slope finding
             [~,idx2] = findpeaks(self.invDerY); %negative slope finding
             self.peak = max(self.y);
             self.valley = max(self.invY);
             self.plotPeaks = plot(self.view, locs, self.y(locs), 'rs');hold on; %peaks
             self.plotValleys = plot(self.view,idx, self.y(idx), 'gs');hold on; %valleys
-            self.plotNegSlope = plot(self.view, idx2, self.y(idx2), 'cd');hold on; %neg slopes
-            self.plotPosSlope = plot(self.view,locs2,self.y(locs2), 'md');hold on; %pos slopes
+            self.plotSlope = plot(self.view, idx2, self.y(idx2), 'cd');hold on; %neg slopes
             self.plotPeaks.Visible = 'off';
             self.plotValleys.Visible = 'off';
-            self.plotNegSlope.Visible = 'off';
-            self.plotPosSlope.Visible = 'off';
+            self.plotSlope.Visible = 'off';
 %             plot(self.view,idx2, self.y(idx2), 'cd');hold on; 
             legend('ECG', 'Derivative', 'QRS','ECG Peaks', 'ECG Valleys',...
-                'Neg Slopes', 'Pos Slopes');
+                'Slopes');
             legend('boxoff');
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
@@ -149,10 +145,9 @@ classdef Plot < handle
             self.invDerY = -diff(self.y);
             self.peak = max(self.y);
             self.valley = max(self.invY);
-            [pks, locs] = findpeaks(self.y,'MinPeakProminence', t.amp, 'MinPeakDistance', t.dur);
-            [invPks, invLocs] = findpeaks(self.invY,'MinPeakProminence', t.amp, 'MinPeakDistance', t.dur);
-            [~,derLocs] = findpeaks(self.derY, 'MinPeakHeight', t.slope, 'MinPeakDistance', t.dur);
-            [~,invDerLocs] = findpeaks(self.invDerY, 'MinPeakHeight', t.slope, 'MinPeakDistance', t.dur);
+            [pks, locs] = findpeaks(self.y,'MinPeakProminence', t.peakProminence, 'MinPeakDistance', t.peakDuration);
+            [invPks, invLocs] = findpeaks(self.invY,'MinPeakProminence', t.valleyProminence, 'MinPeakDistance', t.valleyDuration);
+            [~,invDerLocs] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
             self.plotPeaks.YData = pks;
             self.plotPeaks.XData = locs;
             self.plotPeaks.Visible = 'on';
@@ -161,21 +156,16 @@ classdef Plot < handle
             self.plotValleys.XData = invLocs;
             self.plotValleys.Visible = 'on';
             
-            self.plotPosSlope.YData = self.y(derLocs);
-            self.plotPosSlope.XData = derLocs;
-            self.plotPosSlope.Visible = 'on';
-            
-            self.plotNegSlope.YData = self.y(invDerLocs);
-            self.plotNegSlope.XData = invDerLocs;
-            self.plotNegSlope.Visible = 'on';
+            self.plotSlope.YData = self.y(invDerLocs);
+            self.plotSlope.XData = invDerLocs;
+            self.plotSlope.Visible = 'on';
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
         end
         function clearMarkers(self)
             self.plotPeaks.Visible = 'off';
-            self.plotNegSlope.Visible = 'off';
+            self.plotSlope.Visible = 'off';
             self.plotValleys.Visible = 'off';
-            self.plotPosSlope.Visible = 'off';
         end
 %         function testCurrentPoint(self)
 %             xtest = get(self.view, 'CurrentPoint');

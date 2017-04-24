@@ -26,6 +26,7 @@ classdef App < handle
                 
                 if exist([PathName filename '.m'], 'file')
                     L = load([PathName filename '.m'], '-mat');
+                    self.graph.points = L.p;
                 end
                 
                 if ~self.opened
@@ -111,10 +112,12 @@ classdef App < handle
         
         function markingCallback(self)
             self.mark = struct;
-            self.mark.amp = self.panel.val_amp;
-            self.mark.slope = self.panel.val_slope;
-            self.mark.dur = self.panel.val_dur;
-            self.mark.defl = self.panel.val_defl;
+            self.mark.peakProminence = self.panel.val_peakProminence;
+            self.mark.peakDuration = self.panel.val_peakDuration;
+            self.mark.valleyProminence = self.panel.val_valleyProminence;
+            self.mark.valleyDuration = self.panel.val_valleyDuration;
+            self.mark.slopeHeight = self.panel.val_slopeHeight;
+            self.mark.slopeDuration = self.panel.val_slopeDuration;
         end
     end
 end
