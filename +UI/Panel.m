@@ -87,7 +87,7 @@ classdef Panel < handle
                 'Position', [.01, .78, .25, .1]);
             
             self.informationPanel = uipanel(window, 'Title', 'Data Overview',...
-                'fontSize', 12, 'Position', [.47, .55, .5, .4]);
+                'fontSize', 12, 'Position', [.47, .55, .525, .4]);
             uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10, 'String', 'Amplitude:',...
                 'Units', 'normalized', 'Position', [.05, .8, .1, .1]);
@@ -103,6 +103,14 @@ classdef Panel < handle
             uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10, 'String', 'Duration:',...
                 'Units', 'normalized', 'Position', [.62, .4, .1, .1]);
+            uicontrol(self.informationPanel, 'Style', 'pushbutton',...
+                'String', 'Previous', 'Units', 'normalized',...
+                'Position', [.3, .15, .1, .1],...
+                'Callback', @self.previousMarkCallback);
+            uicontrol(self.informationPanel, 'Style', 'pushbutton',...
+                'String', 'Next', 'Units', 'normalized',...
+                'Position', [.6, .15, .1, .1],...
+                'Callback', @self.nextMarkCallback);
         end
         
         function show(self)
@@ -155,9 +163,6 @@ classdef Panel < handle
     end
     
     methods (Access = private)
-        function nextCallback(self, ~, ~, ~)
-            self.callback('next');
-        end
         
         function channelCallback(self, ~, ~, ~)
             self.channel = str2double(self.channelNumber.String);
@@ -166,6 +171,18 @@ classdef Panel < handle
         
         function previousCallback(self, ~, ~, ~)
             self.callback('previous');
+        end
+        
+        function previousMarkCallback(self, ~, ~, ~)
+            self.callback('previousMark');
+        end
+        
+        function nextCallback(self, ~, ~, ~)
+            self.callback('next');
+        end
+        
+        function nextMarkCallback(self, ~, ~, ~)
+            self.callback('nextMark');
         end
         
         function updateCallback(self, ~, ~, ~)

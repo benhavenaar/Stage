@@ -107,6 +107,8 @@ classdef App < handle
                     self.graph.channel = self.panel.channel;
                     self.graph.updateChannel;
                     self.graph.updateMarkers(self.mark);
+                case 'nextMark'
+                case 'previousMark'
             end
         end
         
