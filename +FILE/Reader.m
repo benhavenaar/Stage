@@ -12,7 +12,6 @@ classdef Reader < handle
            head = fread(fid, 4608, 'unsigned char');
            body = fread(fid, [256 20000], 'int16');
            self.channels = str2double(char(head(1702:1704)'));
-           disp(self.channels);
            try
                calibratie = max(gradient(body(self.channels, :)));
                self.signals = body(1:192, :)' ./ calibratie;
