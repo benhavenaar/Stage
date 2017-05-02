@@ -5,6 +5,7 @@ classdef Plot < handle
         zoom;
         timeline;
         points;
+        callback;
         
         data;
         channel = 1;
@@ -27,6 +28,7 @@ classdef Plot < handle
         plotValleys;
         plotSlope;
         marks;
+        slope;
     end
     
     methods
@@ -40,7 +42,7 @@ classdef Plot < handle
         function plot(self, data)
             self.data = data;
             % Automatic QRS Marker
-            self.firstChannel = self.data(:,1);
+            self.firstChannel = sgolayfilt(self.data(:,1), 7, 23);
             [~, self.qrsXLocations] = findpeaks(self.firstChannel, 'MinPeakProminence', 0.2, 'MinPeakDistance', 300);
             for a = 1:length(self.qrsXLocations)
                 self.qrsXLocationsMin(a) = self.qrsXLocations(a) - 40;
@@ -62,12 +64,12 @@ classdef Plot < handle
             self.plotQRS = plot(self.qrsX, self.y, 'g');hold on;
             [~, locs] = findpeaks(self.y); %standard peak finding
             [~,idx] = findpeaks(self.invY); %initial valley setting
-            [~,idx2] = findpeaks(self.invDerY); %negative slope finding
+            [~,self.slope] = findpeaks(self.invDerY); %negative slope finding
             self.peak = max(self.y);
             self.valley = max(self.invY);
             self.plotPeaks = plot(self.view, locs, self.y(locs), 'rs');hold on; %peaks
-            self.plotValleys = plot(self.view,idx, self.y(idx), 'gs');hold on; %valleys
-            self.plotSlope = plot(self.view, idx2, self.y(idx2), 'cd');hold on; %neg slopes
+            self.plotValleys = plot(self.view, idx, self.y(idx), 'gs');hold on; %valleys
+            self.plotSlope = plot(self.view, self.slope, self.y(self.slope), 'cd');hold on; %neg slopes
             self.plotPeaks.Visible = 'off';
             self.plotValleys.Visible = 'off';
             self.plotSlope.Visible = 'off';
@@ -147,7 +149,7 @@ classdef Plot < handle
             self.valley = max(self.invY);
             [pks, locs] = findpeaks(self.y,'MinPeakProminence', t.peakProminence, 'MinPeakDistance', t.peakDuration);
             [invPks, invLocs] = findpeaks(self.invY,'MinPeakProminence', t.valleyProminence, 'MinPeakDistance', t.valleyDuration);
-            [~,invDerLocs] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
+            [~,self.slope] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
             self.plotPeaks.YData = pks;
             self.plotPeaks.XData = locs;
             self.plotPeaks.Visible = 'on';
@@ -156,16 +158,23 @@ classdef Plot < handle
             self.plotValleys.XData = invLocs;
             self.plotValleys.Visible = 'on';
             
-            self.plotSlope.YData = self.y(invDerLocs);
-            self.plotSlope.XData = invDerLocs;
+            self.plotSlope.YData = self.y(self.slope);
+            self.plotSlope.XData = self.slope;
             self.plotSlope.Visible = 'on';
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
+            
+            self.updatePanel;
         end
+        
         function clearMarkers(self)
             self.plotPeaks.Visible = 'off';
             self.plotSlope.Visible = 'off';
             self.plotValleys.Visible = 'off';
+        end
+        
+        function setCallback(self, x)
+            self.callback = x;
         end
 %         function testCurrentPoint(self)
 %             xtest = get(self.view, 'CurrentPoint');
@@ -179,5 +188,11 @@ classdef Plot < handle
     end
     
     methods (Access = private)
+        
+        function updatePanel(self)
+            %hier amplitude informatie e.d.
+            lat = self.slope;
+            self.callback('update', lat);
+        end
     end
 end

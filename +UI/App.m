@@ -4,10 +4,13 @@ classdef App < handle
         graphX;
         
         mark;
+        markCounter = 1;
         graph;
         panel;
         menu;
         panMode;
+        
+        lat;
         
         reader;
         opened = false;
@@ -46,6 +49,8 @@ classdef App < handle
             self.panel.setCallback(@self.selectableCallback);
             
             self.menu.setOpen(@self.fileOpenerCallback);
+            
+            self.graph.setCallback(@self.infoCallback);
             
             self.show;
             self.markingCallback;
@@ -108,7 +113,29 @@ classdef App < handle
                     self.graph.updateChannel;
                     self.graph.updateMarkers(self.mark);
                 case 'nextMark'
+                    self.markCounter = self.markCounter + 1;
+                    if self.markCounter <= length(self.graph.slope)    
+                        self.panel.update(self.lat(self.markCounter));
+                    else
+                        self.markCounter = 1;
+                        self.panel.update(self.lat(self.markCounter));
+                    end
                 case 'previousMark'
+                    self.markCounter = self.markCounter - 1;
+                    if self.markCounter < 1
+                        self.markCounter = max(length(self.graph.slope));
+                        self.panel.update(self.lat(self.markCounter));
+                    else
+                        self.panel.update(self.lat(self.markCounter));
+                    end
+            end
+        end
+        
+        function infoCallback(self, name, lat)
+            switch name
+                case 'update'
+                    self.lat = lat;
+                    self.panel.update(self.lat(self.markCounter));
             end
         end
         

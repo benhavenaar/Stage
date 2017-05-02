@@ -160,6 +160,18 @@ classdef Panel < handle
         function setCallback(self, callback)
             self.callback = callback;
         end
+        
+        function update(self, lat)
+            self.LAT.String = sprintf('%d ms', lat);
+        end
+        
+%         function update(self, amp, defl, lat, slope, dur)
+%             self.amplitude.String = sprintf('%.2f mV', abs(amp));
+%             self.deflection.String = sprintf('%d', defl);
+%             self.LAT.String = sprintf('%d ms', lat);
+%             self.slope.String = sprintf('%.2f mV/ms', -slope);
+%             self.duration.String = sprintf('%d ms', dur);
+%         end
     end
     
     methods (Access = private)

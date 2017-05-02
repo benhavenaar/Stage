@@ -4,10 +4,13 @@ classdef App < handle
         graphX;
         
         mark;
+        markCounter = 1;
         graph;
         panel;
         menu;
         panMode;
+        
+        lat;
         
         reader;
         opened = false;
@@ -26,6 +29,7 @@ classdef App < handle
                 
                 if exist([PathName filename '.m'], 'file')
                     L = load([PathName filename '.m'], '-mat');
+                    self.graph.points = L.p;
                 end
                 
                 if ~self.opened
@@ -34,7 +38,7 @@ classdef App < handle
                 else
                     self.closeApp
                     self.run;
-                    self.graph.draw(self.reader.all);
+                    self.graph.plot(self.reader.all);
                 end
             end
         end
@@ -45,6 +49,8 @@ classdef App < handle
             self.panel.setCallback(@self.selectableCallback);
             
             self.menu.setOpen(@self.fileOpenerCallback);
+            
+            self.graph.setCallback(@self.infoCallback);
             
             self.show;
             self.markingCallback;
@@ -66,7 +72,7 @@ classdef App < handle
         
         function show(self)
             self.graph.show;
-            self.graph.plot;
+%             self.graph.plot;
             self.panel.show;
         end
         
@@ -106,15 +112,29 @@ classdef App < handle
                     self.graph.channel = self.panel.channel;
                     self.graph.updateChannel;
                     self.graph.updateMarkers(self.mark);
+                case 'nextMark'
+                    self.markCounter = self.markCounter + 1;
+                    self.panel.update(self.lat(self.markCounter));
+                case 'previousMark'
+            end
+        end
+        
+        function infoCallback(self, name, lat)
+            switch name
+                case 'update'
+                    self.lat = lat;
+                    self.panel.update(self.lat(self.markCounter));
             end
         end
         
         function markingCallback(self)
             self.mark = struct;
-            self.mark.amp = self.panel.val_amp;
-            self.mark.slope = self.panel.val_slope;
-            self.mark.dur = self.panel.val_dur;
-            self.mark.defl = self.panel.val_defl;
+            self.mark.peakProminence = self.panel.val_peakProminence;
+            self.mark.peakDuration = self.panel.val_peakDuration;
+            self.mark.valleyProminence = self.panel.val_valleyProminence;
+            self.mark.valleyDuration = self.panel.val_valleyDuration;
+            self.mark.slopeHeight = self.panel.val_slopeHeight;
+            self.mark.slopeDuration = self.panel.val_slopeDuration;
         end
     end
 end
