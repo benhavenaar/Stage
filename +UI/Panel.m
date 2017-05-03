@@ -22,12 +22,13 @@ classdef Panel < handle
         val_valleyDuration = 20;
         val_slopeHeight = 0.2;
         val_slopeDuration = 20;
+        val_range = 20;
         
         amplitude;
         deflection;
         LAT;
         slope;
-        duration;
+        range = 20;
     end
     
     methods
@@ -101,7 +102,7 @@ classdef Panel < handle
                 'fontSize', 10, 'String', 'Slope:',...
                 'Units', 'normalized', 'Position', [.22, .4, .1, .1]);
             uicontrol(self.informationPanel, 'Style', 'text',...
-                'fontSize', 10, 'String', 'Duration:',...
+                'fontSize', 10, 'String', 'Range:',...
                 'Units', 'normalized', 'Position', [.62, .4, .1, .1]);
             uicontrol(self.informationPanel, 'Style', 'pushbutton',...
                 'String', 'Previous', 'Units', 'normalized',...
@@ -142,27 +143,28 @@ classdef Panel < handle
             
             self.amplitude = uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.15, .8, .1, .1]);
+                'fontWeight', 'bold', 'Position', [.15, .8, .1, .1]);
             self.deflection = uicontrol(self.informationPanel, 'Style', 'text',...
-                'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.5, .8, .1, .1]);
+                'fontSize', 10, 'String', '-', 'Units', 'normalized',...
+                'fontWeight', 'bold', 'Position', [.5, .8, .1, .1]);
             self.LAT = uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.9, .8, .1, .1]);
+                'fontWeight', 'bold', 'Position', [.9, .8, .1, .1]);
             self.slope = uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.32, .4, .1, .1]);
-            self.duration = uicontrol(self.informationPanel, 'Style', 'text',...
-                'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.72, .4, .1, .1]);
+                'fontWeight', 'bold', 'Position', [.32, .4, .1, .1]);
+            self.range = uicontrol(self.informationPanel, 'Style', 'edit',...
+                'String', num2str(self.range), 'Units', 'normalized',...
+                'Position', [.72, .41, .1, .1]);
         end
         
         function setCallback(self, callback)
             self.callback = callback;
         end
         
-        function update(self, lat)
+        function update(self, lat, slope)
             self.LAT.String = sprintf('%d ms', lat);
+            self.slope.String = sprintf('%0.2f mV/s', slope);
         end
         
 %         function update(self, amp, defl, lat, slope, dur)
@@ -204,6 +206,7 @@ classdef Panel < handle
             self.val_valleyDuration = str2double(self.valleyDuration.String);
             self.val_slopeHeight = str2double(self.slopeHeight.String);
             self.val_slopeDuration = str2double(self.slopeDuration.String);
+            self.val_range = str2double(self.range.String);
             
             self.callback('update');
         end

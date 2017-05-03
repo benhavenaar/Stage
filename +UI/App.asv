@@ -11,6 +11,7 @@ classdef App < handle
         panMode;
         
         lat;
+        slope;
         
         reader;
         opened = false;
@@ -72,7 +73,6 @@ classdef App < handle
         
         function show(self)
             self.graph.show;
-%             self.graph.plot;
             self.panel.show;
         end
         
@@ -83,10 +83,12 @@ classdef App < handle
                 case 'rightarrow'
                     self.graph.scrollLeftCallback;
                 case 'uparrow'
+                    self.markCounter = 1;
                     self.graph.nextChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
                 case 'downarrow'
+                    self.markCounter = 1;
                     self.graph.previousChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
@@ -98,10 +100,12 @@ classdef App < handle
         function selectableCallback(self, x)
             switch x
                 case 'next'
+                    self.markCounter = 1;
                     self.graph.nextChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
                 case 'previous'
+                    self.markCounter = 1;
                     self.graph.previousChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
@@ -114,16 +118,29 @@ classdef App < handle
                     self.graph.updateMarkers(self.mark);
                 case 'nextMark'
                     self.markCounter = self.markCounter + 1;
-                    self.panel.update(self.lat(self.markCounter));
+                    if self.markCounter <= length(self.graph.slope)    
+                        self.panel.update(self.lat(self.markCounter), );
+                    else
+                        self.markCounter = 1;
+                        self.panel.update(self.lat(self.markCounter));
+                    end
                 case 'previousMark'
+                    self.markCounter = self.markCounter - 1;
+                    if self.markCounter < 1
+                        self.markCounter = max(length(self.graph.slope));
+                        self.panel.update(self.lat(self.markCounter));
+                    else
+                        self.panel.update(self.lat(self.markCounter));
+                    end
             end
         end
         
-        function infoCallback(self, name, lat)
+        function infoCallback(self, name, lat, slope)
             switch name
                 case 'update'
+                    self.slope = slope;
                     self.lat = lat;
-                    self.panel.update(self.lat(self.markCounter));
+                    self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));;
             end
         end
         
@@ -135,6 +152,7 @@ classdef App < handle
             self.mark.valleyDuration = self.panel.val_valleyDuration;
             self.mark.slopeHeight = self.panel.val_slopeHeight;
             self.mark.slopeDuration = self.panel.val_slopeDuration;
+            self.mark.range = self.panel.val_range;
         end
     end
 end

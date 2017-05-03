@@ -29,6 +29,8 @@ classdef Plot < handle
         plotSlope;
         marks;
         slope;
+        lat;
+        panelData;
     end
     
     methods
@@ -141,6 +143,7 @@ classdef Plot < handle
             xlim(self.view, self.timeline);
         end
         function updateMarkers(self, t)
+            self.panelData = t;
             self.y = self.data(:,self.channel);
             self.invY = -self.y;
             self.derY = diff(self.y);
@@ -149,7 +152,7 @@ classdef Plot < handle
             self.valley = max(self.invY);
             [pks, locs] = findpeaks(self.y,'MinPeakProminence', t.peakProminence, 'MinPeakDistance', t.peakDuration);
             [invPks, invLocs] = findpeaks(self.invY,'MinPeakProminence', t.valleyProminence, 'MinPeakDistance', t.valleyDuration);
-            [~,self.slope] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
+            [self.slope,self.lat] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
             self.plotPeaks.YData = pks;
             self.plotPeaks.XData = locs;
             self.plotPeaks.Visible = 'on';
@@ -158,8 +161,8 @@ classdef Plot < handle
             self.plotValleys.XData = invLocs;
             self.plotValleys.Visible = 'on';
             
-            self.plotSlope.YData = self.y(self.slope);
-            self.plotSlope.XData = self.slope;
+            self.plotSlope.YData = self.y(self.lat);
+            self.plotSlope.XData = self.lat;
             self.plotSlope.Visible = 'on';
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
@@ -191,8 +194,11 @@ classdef Plot < handle
         
         function updatePanel(self)
             %hier amplitude informatie e.d.
-            lat = self.slope;
-            self.callback('update', lat);
+            try
+                self.callback('update', self.lat, self.slope);
+            catch
+                errordlg('No slope found.');
+            end
         end
     end
 end
