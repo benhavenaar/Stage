@@ -41,6 +41,8 @@ classdef App < handle
                     self.run;
                     self.graph.plot(self.reader.all);
                 end
+                self.window.Name = ['ECG: ', filename];
+                
             end
         end
         
@@ -50,6 +52,7 @@ classdef App < handle
             self.panel.setCallback(@self.selectableCallback);
             
             self.menu.setOpen(@self.fileOpenerCallback);
+            self.menu.setCallbacks(@self.menuCallback);
             
             self.graph.setCallback(@self.infoCallback);
             
@@ -110,6 +113,7 @@ classdef App < handle
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
                 case 'update'
+                    self.markCounter = 1;
                     self.markingCallback;
                     self.graph.updateMarkers(self.mark);
                 case 'channel'
@@ -119,19 +123,28 @@ classdef App < handle
                 case 'nextMark'
                     self.markCounter = self.markCounter + 1;
                     if self.markCounter <= length(self.graph.slope)    
-                        self.panel.update(self.lat(self.markCounter), );
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));
                     else
                         self.markCounter = 1;
-                        self.panel.update(self.lat(self.markCounter));
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));
                     end
                 case 'previousMark'
                     self.markCounter = self.markCounter - 1;
                     if self.markCounter < 1
                         self.markCounter = max(length(self.graph.slope));
-                        self.panel.update(self.lat(self.markCounter));
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));
                     else
-                        self.panel.update(self.lat(self.markCounter));
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));
                     end
+            end
+        end
+        
+        function menuCallback(self, x)
+            switch x
+                case 'qrs'
+                    %qrs toggle hier
+                case 'marks'
+                    %marks toggle hier
             end
         end
         
@@ -140,7 +153,7 @@ classdef App < handle
                 case 'update'
                     self.slope = slope;
                     self.lat = lat;
-                    self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));;
+                    self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));
             end
         end
         

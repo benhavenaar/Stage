@@ -155,7 +155,8 @@ classdef Panel < handle
                 'fontWeight', 'bold', 'Position', [.32, .4, .1, .1]);
             self.range = uicontrol(self.informationPanel, 'Style', 'edit',...
                 'String', num2str(self.range), 'Units', 'normalized',...
-                'Position', [.72, .41, .1, .1]);
+                'Position', [.72, .41, .1, .1],...
+                'Callback', @self.updateCallback);
         end
         
         function setCallback(self, callback)
@@ -164,7 +165,7 @@ classdef Panel < handle
         
         function update(self, lat, slope)
             self.LAT.String = sprintf('%d ms', lat);
-            self.slope.String = sprintf('%0.2f mV/s', slope);
+            self.slope.String = sprintf('%0.2f V/ms', slope);
         end
         
 %         function update(self, amp, defl, lat, slope, dur)

@@ -41,6 +41,8 @@ classdef App < handle
                     self.run;
                     self.graph.plot(self.reader.all);
                 end
+                self.window.Name = ['ECG: ', filename];
+                
             end
         end
         
@@ -50,6 +52,7 @@ classdef App < handle
             self.panel.setCallback(@self.selectableCallback);
             
             self.menu.setOpen(@self.fileOpenerCallback);
+            self.menu.setCallbacks(@self.menuCallback);
             
             self.graph.setCallback(@self.infoCallback);
             
@@ -92,8 +95,6 @@ classdef App < handle
                     self.graph.previousChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
-                case 'c'
-                    self.graph.clearMarkers;
             end
         end
         
@@ -110,6 +111,7 @@ classdef App < handle
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
                 case 'update'
+                    self.markCounter = 1;
                     self.markingCallback;
                     self.graph.updateMarkers(self.mark);
                 case 'channel'
@@ -132,6 +134,17 @@ classdef App < handle
                     else
                         self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter));
                     end
+            end
+        end
+        
+        function menuCallback(self, x)
+            switch x
+                case 'qrs'
+                    %qrs toggle hier
+                    self.graph.toggleQRS;
+                case 'marks'
+                    %marks toggle hier
+                    self.graph.toggleMarks;
             end
         end
         

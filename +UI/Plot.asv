@@ -161,8 +161,8 @@ classdef Plot < handle
             self.plotValleys.XData = invLocs;
             self.plotValleys.Visible = 'on';
             
-            self.plotSlope.YData = self.y(self.slope);
-            self.plotSlope.XData = self.slope;
+            self.plotSlope.YData = self.y(self.lat);
+            self.plotSlope.XData = self.lat;
             self.plotSlope.Visible = 'on';
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
@@ -174,6 +174,23 @@ classdef Plot < handle
             self.plotPeaks.Visible = 'off';
             self.plotSlope.Visible = 'off';
             self.plotValleys.Visible = 'off';
+        end
+        
+        function toggleQRS(self)
+            if ~isempty(self.plotQRS)
+                state = self.plotQRS.Visible;
+                
+                if strcmp(state, 'off')
+                    self.plotQRS.Visible = 'on';
+                else
+                    self.plotQRS.Visible = 'off';
+                end
+            end
+        end
+        
+        function toggleMarks(self)
+            if ~isempty(
+            disp('Toggle Marks');
         end
         
         function setCallback(self, x)
@@ -194,9 +211,11 @@ classdef Plot < handle
         
         function updatePanel(self)
             %hier amplitude informatie e.d.
-            lat = self.lat;
-            
-            self.callback('update', lat);
+            try
+                self.callback('update', self.lat, self.slope);
+            catch
+                errordlg('No slope found.');
+            end
         end
     end
 end

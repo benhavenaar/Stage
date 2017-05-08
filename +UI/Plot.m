@@ -155,39 +155,49 @@ classdef Plot < handle
             [self.slope,self.lat] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
             self.plotPeaks.YData = pks;
             self.plotPeaks.XData = locs;
-            self.plotPeaks.Visible = 'on';
             
             self.plotValleys.YData = -invPks;
             self.plotValleys.XData = invLocs;
-            self.plotValleys.Visible = 'on';
             
             self.plotSlope.YData = self.y(self.lat);
             self.plotSlope.XData = self.lat;
-            self.plotSlope.Visible = 'on';
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
             
             self.updatePanel;
         end
         
-        function clearMarkers(self)
-            self.plotPeaks.Visible = 'off';
-            self.plotSlope.Visible = 'off';
-            self.plotValleys.Visible = 'off';
+        function toggleQRS(self)
+            if ~isempty(self.plotQRS)
+                state = self.plotQRS.Visible;
+                
+                if strcmp(state, 'off')
+                    self.plotQRS.Visible = 'on';
+                else
+                    self.plotQRS.Visible = 'off';
+                end
+            end
+        end
+        
+        function toggleMarks(self)
+            if ~isempty(self.plotSlope)
+                state = self.plotSlope.Visible;
+                
+                if strcmp(state, 'off')
+                    self.plotSlope.Visible = 'on';
+                    self.plotPeaks.Visible = 'on';
+                    self.plotValleys.Visible = 'on';
+                else 
+                    self.plotSlope.Visible = 'off';
+                    self.plotPeaks.Visible = 'off';
+                    self.plotValleys.Visible = 'off';
+                end
+            end
         end
         
         function setCallback(self, x)
             self.callback = x;
         end
-%         function testCurrentPoint(self)
-%             xtest = get(self.view, 'CurrentPoint');
-%             ytest = get(self.view, 'Ylim');
-%             disp(xtest);
-%             
-%             seeker = patch(self.view, [xtest(1)-45 xtest(1)+45 xtest(1)+45 xtest(1)-45],...
-%                 [ytest(1) ytest(1) ytest(2) ytest(2)], [1 .6 1], 'EdgeColor', 'None');
-%             uistack(seeker, 'bottom');
-%         end
     end
     
     methods (Access = private)
