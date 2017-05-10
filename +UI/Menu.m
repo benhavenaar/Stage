@@ -17,7 +17,8 @@ classdef Menu < handle
             
             self.v = uimenu('Label', '&View');
             uimenu(self.v, 'Label', '&Show QRS', 'Checked', 'on');
-            uimenu(self.v, 'Label', '&Show Markings', 'Checked', 'off');
+            uimenu(self.v, 'Label', 'Show &Markings', 'Checked', 'off');
+            uimenu(self.v, 'Label', 'Show &Derivative', 'Checked', 'on');
         end
         
         function setOpen(self, x)
@@ -27,12 +28,25 @@ classdef Menu < handle
         function setCallbacks(self, x)
             self.callback = x;
             
-            set(self.v.Children(2), 'Callback', @self.qrsToggle);
-            set(self.v.Children(1), 'Callback', @self.marksToggle);
+            set(self.v.Children(3), 'Callback', @self.qrsToggle);
+            set(self.v.Children(2), 'Callback', @self.marksToggle);
+            set(self.v.Children(1), 'Callback', @self.derivativeToggle);
         end
     end
     methods (Access = private)
         function qrsToggle(self, ~, ~)
+            state = self.v.Children(3).Checked;
+            
+            if strcmp(state, 'on')
+                self.v.Children(3).Checked = 'off';
+            else
+                self.v.Children(3).Checked = 'on';
+            end
+            
+            self.callback('qrs');
+        end
+        
+        function marksToggle(self, ~, ~)
             state = self.v.Children(2).Checked;
             
             if strcmp(state, 'on')
@@ -41,10 +55,10 @@ classdef Menu < handle
                 self.v.Children(2).Checked = 'on';
             end
             
-            self.callback('qrs');
+            self.callback('marks');
         end
         
-        function marksToggle(self, ~, ~)
+        function derivativeToggle(self, ~, ~)
             state = self.v.Children(1).Checked;
             
             if strcmp(state, 'on')
@@ -53,7 +67,7 @@ classdef Menu < handle
                 self.v.Children(1).Checked = 'on';
             end
             
-            self.callback('marks');
+            self.callback('derivative');
         end
     end
 end

@@ -95,8 +95,6 @@ classdef App < handle
                     self.graph.previousChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
-                case 'c'
-                    self.graph.clearMarkers;
             end
         end
         
@@ -143,8 +141,10 @@ classdef App < handle
             switch x
                 case 'qrs'
                     %qrs toggle hier
+                    self.graph.toggleQRS;
                 case 'marks'
                     %marks toggle hier
+                    self.graph.toggleMarks;
             end
         end
         

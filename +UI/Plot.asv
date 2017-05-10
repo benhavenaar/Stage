@@ -27,9 +27,12 @@ classdef Plot < handle
         plotPeaks;
         plotValleys;
         plotSlope;
+        plotVLine;
         marks;
         slope;
         lat;
+        range;
+        amplitude;
         panelData;
     end
     
@@ -66,15 +69,16 @@ classdef Plot < handle
             self.plotQRS = plot(self.qrsX, self.y, 'g');hold on;
             [~, locs] = findpeaks(self.y); %standard peak finding
             [~,idx] = findpeaks(self.invY); %initial valley setting
-            [~,self.slope] = findpeaks(self.invDerY); %negative slope finding
+            [~,self.lat] = findpeaks(self.invDerY); %negative slope finding
             self.peak = max(self.y);
             self.valley = max(self.invY);
             self.plotPeaks = plot(self.view, locs, self.y(locs), 'rs');hold on; %peaks
             self.plotValleys = plot(self.view, idx, self.y(idx), 'gs');hold on; %valleys
-            self.plotSlope = plot(self.view, self.slope, self.y(self.slope), 'cd');hold on; %neg slopes
+            self.plotSlope = plot(self.view, self.lat, self.y(self.lat), 'cd');hold on; %neg slopes
             self.plotPeaks.Visible = 'off';
             self.plotValleys.Visible = 'off';
             self.plotSlope.Visible = 'off';
+%             self.plotVLine.Visible = 'off';
 %             plot(self.view,idx2, self.y(idx2), 'cd');hold on; 
             legend('ECG', 'Derivative', 'QRS','ECG Peaks', 'ECG Valleys',...
                 'Slopes');
@@ -155,25 +159,25 @@ classdef Plot < handle
             [self.slope,self.lat] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
             self.plotPeaks.YData = pks;
             self.plotPeaks.XData = locs;
-            self.plotPeaks.Visible = 'on';
             
             self.plotValleys.YData = -invPks;
             self.plotValleys.XData = invLocs;
-            self.plotValleys.Visible = 'on';
             
             self.plotSlope.YData = self.y(self.lat);
             self.plotSlope.XData = self.lat;
-            self.plotSlope.Visible = 'on';
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
             
+            try
+                maxAmp = max(self.data(self.lat(self.panelData.markCounter)-(self.panelData.range/2):self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                minAmp = min(self.data(self.lat(self.panelData.markCounter)-(self.panelData.range/2):self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                self.amplitude = abs(maxAmp - minAmp);
+            catch
+                maxAmp = max(self.data(1:self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                minAmp = min(self.data(1:self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                self.amplitude = abs(maxAmp - minAmp);
+            end
             self.updatePanel;
-        end
-        
-        function clearMarkers(self)
-            self.plotPeaks.Visible = 'off';
-            self.plotSlope.Visible = 'off';
-            self.plotValleys.Visible = 'off';
         end
         
         function toggleQRS(self)
@@ -189,22 +193,36 @@ classdef Plot < handle
         end
         
         function toggleMarks(self)
-            if ~isempty(
-            disp('Toggle Marks');
+            if ~isempty(self.plotSlope)
+                state = self.plotSlope.Visible;
+                
+                if strcmp(state, 'off')
+                    self.plotSlope.Visible = 'on';
+                    self.plotPeaks.Visible = 'on';
+                    self.plotValleys.Visible = 'on';
+                else 
+                    self.plotSlope.Visible = 'off';
+                    self.plotPeaks.Visible = 'off';
+                    self.plotValleys.Visible = 'off';
+                end
+            end
+        end
+        
+        function toggleDerivative(self)
+            if ~isempty(self.plotDerivative)
+                state = self.plotDerivative.Visible;
+                
+                if strcmp(state, 'off')
+                    self.plotDerivative.Visible = 'on';
+                else
+                    self.plotDerivative.Visible = 'off';
+                end
+            end
         end
         
         function setCallback(self, x)
             self.callback = x;
         end
-%         function testCurrentPoint(self)
-%             xtest = get(self.view, 'CurrentPoint');
-%             ytest = get(self.view, 'Ylim');
-%             disp(xtest);
-%             
-%             seeker = patch(self.view, [xtest(1)-45 xtest(1)+45 xtest(1)+45 xtest(1)-45],...
-%                 [ytest(1) ytest(1) ytest(2) ytest(2)], [1 .6 1], 'EdgeColor', 'None');
-%             uistack(seeker, 'bottom');
-%         end
     end
     
     methods (Access = private)
@@ -212,7 +230,7 @@ classdef Plot < handle
         function updatePanel(self)
             %hier amplitude informatie e.d.
             try
-                self.callback('update', self.lat, self.slope);
+                self.callback('update', self.lat, self.slope, self.amplitude);
             catch
                 errordlg('No slope found.');
             end

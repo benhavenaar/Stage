@@ -22,12 +22,13 @@ classdef Panel < handle
         val_valleyDuration = 20;
         val_slopeHeight = 0.2;
         val_slopeDuration = 20;
+        val_range = 20;
         
         amplitude;
         deflection;
         LAT;
         slope;
-        duration;
+        range = 20;
     end
     
     methods
@@ -87,7 +88,7 @@ classdef Panel < handle
                 'Position', [.01, .78, .25, .1]);
             
             self.informationPanel = uipanel(window, 'Title', 'Data Overview',...
-                'fontSize', 12, 'Position', [.47, .55, .55, .4]);
+                'fontSize', 12, 'Position', [.47, .55, .525, .4]);
             uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10, 'String', 'Amplitude:',...
                 'Units', 'normalized', 'Position', [.05, .8, .1, .1]);
@@ -101,8 +102,16 @@ classdef Panel < handle
                 'fontSize', 10, 'String', 'Slope:',...
                 'Units', 'normalized', 'Position', [.22, .4, .1, .1]);
             uicontrol(self.informationPanel, 'Style', 'text',...
-                'fontSize', 10, 'String', 'Duration:',...
+                'fontSize', 10, 'String', 'Range:',...
                 'Units', 'normalized', 'Position', [.62, .4, .1, .1]);
+            uicontrol(self.informationPanel, 'Style', 'pushbutton',...
+                'String', 'Previous', 'Units', 'normalized',...
+                'Position', [.3, .15, .1, .1],...
+                'Callback', @self.previousMarkCallback);
+            uicontrol(self.informationPanel, 'Style', 'pushbutton',...
+                'String', 'Next', 'Units', 'normalized',...
+                'Position', [.6, .15, .1, .1],...
+                'Callback', @self.nextMarkCallback);
         end
         
         function show(self)
@@ -134,30 +143,42 @@ classdef Panel < handle
             
             self.amplitude = uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.15, .8, .1, .1]);
+                'fontWeight', 'bold', 'Position', [.15, .8, .1, .1]);
             self.deflection = uicontrol(self.informationPanel, 'Style', 'text',...
-                'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.5, .8, .1, .1]);
+                'fontSize', 10, 'String', '-', 'Units', 'normalized',...
+                'fontWeight', 'bold', 'Position', [.5, .8, .1, .1]);
             self.LAT = uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.9, .8, .1, .1]);
+                'fontWeight', 'bold', 'Position', [.9, .8, .1, .1]);
             self.slope = uicontrol(self.informationPanel, 'Style', 'text',...
                 'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.32, .4, .1, .1]);
-            self.duration = uicontrol(self.informationPanel, 'Style', 'text',...
-                'fontSize', 10', 'String', '-', 'Units', 'normalized',...
-                'Position', [.72, .4, .1, .1]);
+                'fontWeight', 'bold', 'Position', [.32, .4, .1, .1]);
+            self.range = uicontrol(self.informationPanel, 'Style', 'edit',...
+                'String', num2str(self.range), 'Units', 'normalized',...
+                'Position', [.72, .41, .1, .1],...
+                'Callback', @self.updateCallback);
         end
         
         function setCallback(self, callback)
             self.callback = callback;
         end
+        
+        function update(self, lat, slope, amp)
+            self.LAT.String = sprintf('%d ms', lat);
+            self.slope.String = sprintf('%0.2f V/ms', slope);
+            self.amplitude.String = sprintf('
+        end
+        
+%         function update(self, amp, defl, lat, slope, dur)
+%             self.amplitude.String = sprintf('%.2f mV', abs(amp));
+%             self.deflection.String = sprintf('%d', defl);
+%             self.LAT.String = sprintf('%d ms', lat);
+%             self.slope.String = sprintf('%.2f mV/ms', -slope);
+%             self.duration.String = sprintf('%d ms', dur);
+%         end
     end
     
     methods (Access = private)
-        function nextCallback(self, ~, ~, ~)
-            self.callback('next');
-        end
         
         function channelCallback(self, ~, ~, ~)
             self.channel = str2double(self.channelNumber.String);
@@ -168,6 +189,18 @@ classdef Panel < handle
             self.callback('previous');
         end
         
+        function previousMarkCallback(self, ~, ~, ~)
+            self.callback('previousMark');
+        end
+        
+        function nextCallback(self, ~, ~, ~)
+            self.callback('next');
+        end
+        
+        function nextMarkCallback(self, ~, ~, ~)
+            self.callback('nextMark');
+        end
+        
         function updateCallback(self, ~, ~, ~)
             self.val_peakProminence = str2double(self.peakProminence.String);
             self.val_peakDuration = str2double(self.peakDuration.String);
@@ -175,6 +208,7 @@ classdef Panel < handle
             self.val_valleyDuration = str2double(self.valleyDuration.String);
             self.val_slopeHeight = str2double(self.slopeHeight.String);
             self.val_slopeDuration = str2double(self.slopeDuration.String);
+            self.val_range = str2double(self.range.String);
             
             self.callback('update');
         end

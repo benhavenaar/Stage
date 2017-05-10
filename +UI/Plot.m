@@ -27,9 +27,12 @@ classdef Plot < handle
         plotPeaks;
         plotValleys;
         plotSlope;
+        plotVLine;
         marks;
         slope;
         lat;
+        range;
+        amplitude;
         panelData;
     end
     
@@ -66,16 +69,17 @@ classdef Plot < handle
             self.plotQRS = plot(self.qrsX, self.y, 'g');hold on;
             [~, locs] = findpeaks(self.y); %standard peak finding
             [~,idx] = findpeaks(self.invY); %initial valley setting
-            [~,self.slope] = findpeaks(self.invDerY); %negative slope finding
+            [~,self.lat] = findpeaks(self.invDerY); %negative slope finding
             self.peak = max(self.y);
             self.valley = max(self.invY);
             self.plotPeaks = plot(self.view, locs, self.y(locs), 'rs');hold on; %peaks
             self.plotValleys = plot(self.view, idx, self.y(idx), 'gs');hold on; %valleys
-            self.plotSlope = plot(self.view, self.slope, self.y(self.slope), 'cd');hold on; %neg slopes
+            self.plotSlope = plot(self.view, self.lat, self.y(self.lat), 'cd');hold on; %neg slopes
             self.plotPeaks.Visible = 'off';
             self.plotValleys.Visible = 'off';
             self.plotSlope.Visible = 'off';
-%             plot(self.view,idx2, self.y(idx2), 'cd');hold on; 
+            %             self.plotVLine.Visible = 'off';
+            %             plot(self.view,idx2, self.y(idx2), 'cd');hold on;
             legend('ECG', 'Derivative', 'QRS','ECG Peaks', 'ECG Valleys',...
                 'Slopes');
             legend('boxoff');
@@ -90,7 +94,7 @@ classdef Plot < handle
         function show(self)
             ylim(self.view, self.zoom);
             xlim(self.view, [0 1000]);
-
+            
             set(self.view, 'box', 'off',...
                 'XAxisLocation', 'top');
         end
@@ -164,6 +168,15 @@ classdef Plot < handle
             
             ylim(self.view, [-self.valley-.5 self.peak+.5]);
             
+            try
+                maxAmp = max(self.data(self.lat(self.panelData.markCounter)-(self.panelData.range/2):self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                minAmp = min(self.data(self.lat(self.panelData.markCounter)-(self.panelData.range/2):self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                self.amplitude = abs(maxAmp - minAmp);
+            catch
+                maxAmp = max(self.data(1:self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                minAmp = min(self.data(1:self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                self.amplitude = abs(maxAmp - minAmp);
+            end
             self.updatePanel;
         end
         
@@ -187,10 +200,22 @@ classdef Plot < handle
                     self.plotSlope.Visible = 'on';
                     self.plotPeaks.Visible = 'on';
                     self.plotValleys.Visible = 'on';
-                else 
+                else
                     self.plotSlope.Visible = 'off';
                     self.plotPeaks.Visible = 'off';
                     self.plotValleys.Visible = 'off';
+                end
+            end
+        end
+        
+        function toggleDerivative(self)
+            if ~isempty(self.plotDerivative)
+                state = self.plotDerivative.Visible;
+                
+                if strcmp(state, 'off')
+                    self.plotDerivative.Visible = 'on';
+                else
+                    self.plotDerivative.Visible = 'off';
                 end
             end
         end
@@ -201,14 +226,13 @@ classdef Plot < handle
     end
     
     methods (Access = private)
-        
-        function updatePanel(self)
-            %hier amplitude informatie e.d.
-            try
-                self.callback('update', self.lat, self.slope);
-            catch
-                errordlg('No slope found.');
+            function updatePanel(self)
+                %hier amplitude informatie e.d.
+                try
+                    self.callback('update', self.lat, self.slope, self.amplitude);
+                catch
+                    errordlg('No slope found.');
+                end
             end
         end
     end
-end
