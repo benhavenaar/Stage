@@ -102,17 +102,17 @@ classdef App < handle
         function selectableCallback(self, x)
             switch x
                 case 'next'
-                    self.markCounter = 1;
+%                     self.markCounter = 1;
                     self.graph.nextChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
                 case 'previous'
-                    self.markCounter = 1;
+%                     self.markCounter = 1;
                     self.graph.previousChannel;
                     self.graph.updateMarkers(self.mark);
                     self.panel.channelNumber.String = num2str(self.graph.channel);
                 case 'update'
-                    self.markCounter = 1;
+%                     self.markCounter = 1;
                     self.markingCallback;
                     self.graph.updateMarkers(self.mark);
                 case 'channel'
@@ -125,6 +125,12 @@ classdef App < handle
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
                         self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude);
+                        while self.lat(self.markCounter) > self.graph.scroll+500;
+                            self.graph.scrollLeftCallback;
+                        end
+                        while self.lat(self.markCounter) < self.graph.scroll+500;
+                            self.graph.scrollRightCallback;
+                        end
                     else
                         self.markCounter = 1;
                         self.markingCallback;

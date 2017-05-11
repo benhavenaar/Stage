@@ -21,6 +21,7 @@ classdef Plot < handle
         invDerY;
         peak;
         valley;
+        
         plotECG;
         plotDerivative;
         plotQRS;
@@ -28,12 +29,15 @@ classdef Plot < handle
         plotValleys;
         plotSlope;
         plotVLine;
+        
         marks;
         slope;
         lat;
         range;
         amplitude;
         panelData;
+        
+        highlight;
     end
     
     methods
@@ -154,9 +158,26 @@ classdef Plot < handle
             self.invDerY = -diff(self.y);
             self.peak = max(self.y);
             self.valley = max(self.invY);
+            ylim(self.view, [-self.valley-.5 self.peak+.5]);
+            height = get(self.view, 'YLim');
             [pks, locs] = findpeaks(self.y,'MinPeakProminence', t.peakProminence, 'MinPeakDistance', t.peakDuration);
             [invPks, invLocs] = findpeaks(self.invY,'MinPeakProminence', t.valleyProminence, 'MinPeakDistance', t.valleyDuration);
             [self.slope,self.lat] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
+            if isempty(self.highlight)
+                locate = [self.lat(self.panelData.markCounter)-self.panelData.range/2 ...
+                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ... 
+                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ... 
+                    self.lat(self.panelData.markCounter)-self.panelData.range/2];
+                self.highlight = patch(self.view, locate, [height(1) height(1) height(2) height(2)], [.8 1 1], 'EdgeColor', 'None');
+                uistack(self.highlight, 'bottom');
+                self.highlight.Visible = 'off';
+            else
+                self.highlight.XData = [self.lat(self.panelData.markCounter)-self.panelData.range/2 ...
+                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ...
+                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ... 
+                    self.lat(self.panelData.markCounter)-self.panelData.range/2];
+                self.highlight.YData = [height(1) height(1) height(2) height(2)];
+            end
             self.plotPeaks.YData = pks;
             self.plotPeaks.XData = locs;
             
@@ -165,8 +186,6 @@ classdef Plot < handle
             
             self.plotSlope.YData = self.y(self.lat);
             self.plotSlope.XData = self.lat;
-            
-            ylim(self.view, [-self.valley-.5 self.peak+.5]);
             
             try
                 maxAmp = max(self.data(self.lat(self.panelData.markCounter)-(self.panelData.range/2):self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
@@ -200,10 +219,12 @@ classdef Plot < handle
                     self.plotSlope.Visible = 'on';
                     self.plotPeaks.Visible = 'on';
                     self.plotValleys.Visible = 'on';
+                    self.highlight.Visible = 'on';
                 else
                     self.plotSlope.Visible = 'off';
                     self.plotPeaks.Visible = 'off';
                     self.plotValleys.Visible = 'off';
+                    self.highlight.Visible = 'off';
                 end
             end
         end
