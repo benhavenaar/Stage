@@ -13,6 +13,7 @@ classdef App < handle
         lat;
         slope;
         amplitude;
+        deflection;
         
         reader;
         opened = false;
@@ -124,7 +125,7 @@ classdef App < handle
                     if self.markCounter <= length(self.graph.slope)
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
-                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude);
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
                         while self.lat(self.markCounter) > self.graph.scroll+500;
                             self.graph.scrollLeftCallback;
                         end
@@ -135,7 +136,7 @@ classdef App < handle
                         self.markCounter = 1;
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
-                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude);
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
                     end
                 case 'previousMark'
                     self.markCounter = self.markCounter - 1;
@@ -143,11 +144,11 @@ classdef App < handle
                         self.markCounter = max(length(self.graph.slope));
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
-                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude);
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
                     else
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
-                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude);
+                        self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
                     end
             end
         end
@@ -165,13 +166,14 @@ classdef App < handle
             end
         end
         
-        function infoCallback(self, name, lat, slope, amp)
+        function infoCallback(self, name, lat, slope, amp, defl)
             switch name
                 case 'update'
                     self.slope = slope;
                     self.lat = lat;
                     self.amplitude = amp;
-                    self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude);
+                    self.deflection = defl;
+                    self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
             end
         end
         

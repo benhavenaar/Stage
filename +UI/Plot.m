@@ -35,6 +35,7 @@ classdef Plot < handle
         lat;
         range;
         amplitude;
+        deflection;
         panelData;
         
         highlight;
@@ -165,8 +166,8 @@ classdef Plot < handle
             [self.slope,self.lat] = findpeaks(self.invDerY, 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
             if isempty(self.highlight)
                 locate = [self.lat(self.panelData.markCounter)-self.panelData.range/2 ...
-                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ... 
-                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ... 
+                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ...
+                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ...
                     self.lat(self.panelData.markCounter)-self.panelData.range/2];
                 self.highlight = patch(self.view, locate, [height(1) height(1) height(2) height(2)], [.8 1 1], 'EdgeColor', 'None');
                 uistack(self.highlight, 'bottom');
@@ -174,7 +175,7 @@ classdef Plot < handle
             else
                 self.highlight.XData = [self.lat(self.panelData.markCounter)-self.panelData.range/2 ...
                     self.lat(self.panelData.markCounter)+self.panelData.range/2 ...
-                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ... 
+                    self.lat(self.panelData.markCounter)+self.panelData.range/2 ...
                     self.lat(self.panelData.markCounter)-self.panelData.range/2];
                 self.highlight.YData = [height(1) height(1) height(2) height(2)];
             end
@@ -186,14 +187,21 @@ classdef Plot < handle
             
             self.plotSlope.YData = self.y(self.lat);
             self.plotSlope.XData = self.lat;
+%             self.invDerY = sgolayfilt(self.invDerY, 7, 23);
+            try
+                [~, defl] = findpeaks(self.invDerY(self.highlight.XData(1):self.highlight.XData(2)), 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
+                self.deflection = length(defl);
+            catch
+                errordlg('Range can`t be smaller than slope duration');
+            end
             
             try
-                maxAmp = max(self.data(self.lat(self.panelData.markCounter)-(self.panelData.range/2):self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
-                minAmp = min(self.data(self.lat(self.panelData.markCounter)-(self.panelData.range/2):self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                maxAmp = max(self.data(self.highlight.XData(1):self.highlight.XData(2), self.channel));
+                minAmp = min(self.data(self.highlight.XData(1):self.highlight.XData(2), self.channel));
                 self.amplitude = abs(maxAmp - minAmp);
             catch
-                maxAmp = max(self.data(1:self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
-                minAmp = min(self.data(1:self.lat(self.panelData.markCounter)+(self.panelData.range/2), self.channel));
+                maxAmp = max(self.data(1:self.highlight.XData(2), self.channel));
+                minAmp = min(self.data(1:self.highlight.XData(2), self.channel));
                 self.amplitude = abs(maxAmp - minAmp);
             end
             self.updatePanel;
@@ -247,13 +255,13 @@ classdef Plot < handle
     end
     
     methods (Access = private)
-            function updatePanel(self)
-                %hier amplitude informatie e.d.
-                try
-                    self.callback('update', self.lat, self.slope, self.amplitude);
-                catch
-                    errordlg('No slope found.');
-                end
+        function updatePanel(self)
+            %hier amplitude informatie e.d.
+            try
+                self.callback('update', self.lat, self.slope, self.amplitude, self.deflection);
+            catch
+                errordlg('No slope found.');
             end
         end
     end
+end

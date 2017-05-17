@@ -14,14 +14,14 @@ classdef Panel < handle
         valleyProminence = 1;
         valleyDuration = 20;
         slopeHeight = 0.2;
-        slopeDuration = 20;
+        slopeDuration = 10;
         
         val_peakProminence = 1;
         val_peakDuration = 20;
         val_valleyProminence = 1;
         val_valleyDuration = 20;
         val_slopeHeight = 0.2;
-        val_slopeDuration = 20;
+        val_slopeDuration = 10;
         val_range = 20;
         
         amplitude;
@@ -163,10 +163,11 @@ classdef Panel < handle
             self.callback = callback;
         end
         
-        function update(self, lat, slope, amp)
+        function update(self, lat, slope, amp, defl)
             self.LAT.String = sprintf('%d ms', lat);
             self.slope.String = sprintf('%0.2f V/ms', slope);
             self.amplitude.String = sprintf('%0.2f V', amp);
+            self.deflection.String = sprintf('%d', defl);
         end
         
 %         function update(self, amp, defl, lat, slope, dur)
