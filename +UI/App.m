@@ -129,14 +129,14 @@ classdef App < handle
                         while self.lat(self.markCounter) > self.graph.scroll+500;
                             self.graph.scrollLeftCallback;
                         end
-                        while self.lat(self.markCounter) < self.graph.scroll+500;
-                            self.graph.scrollRightCallback;
-                        end
                     else
                         self.markCounter = 1;
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
                         self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
+                        while self.lat(self.markCounter) < self.graph.scroll+500;
+                            self.graph.scrollRightCallback;
+                        end
                     end
                 case 'previousMark'
                     self.markCounter = self.markCounter - 1;
@@ -145,10 +145,16 @@ classdef App < handle
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
                         self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
+                        while self.lat(self.markCounter) > self.graph.scroll+500;
+                            self.graph.scrollLeftCallback;
+                        end
                     else
                         self.markingCallback;
                         self.graph.updateMarkers(self.mark);
                         self.panel.update(self.lat(self.markCounter), self.slope(self.markCounter), self.amplitude, self.deflection);
+                        while self.lat(self.markCounter) < self.graph.scroll;
+                            self.graph.scrollRightCallback;
+                        end
                     end
             end
         end

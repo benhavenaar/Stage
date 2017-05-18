@@ -189,6 +189,7 @@ classdef Plot < handle
             self.plotSlope.XData = self.lat;
 %             self.invDerY = sgolayfilt(self.invDerY, 7, 23);
             try
+                self.invDerY = -diff(sgolayfilt(self.y, 7, 23));
                 [~, defl] = findpeaks(self.invDerY(self.highlight.XData(1):self.highlight.XData(2)), 'MinPeakHeight', t.slopeHeight, 'MinPeakDistance', t.slopeDuration);
                 self.deflection = length(defl);
             catch

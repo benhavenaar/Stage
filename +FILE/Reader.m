@@ -16,7 +16,7 @@ classdef Reader < handle
                calibratie = max(gradient(body(self.channels, :)));
                self.signals = body(1:192, :)' ./ calibratie;
            catch
-               self.signals = body(1:192,:)' ./ 2500;
+               self.signals = body(1:192, :)' ./ 2500;
            end
             
         end
